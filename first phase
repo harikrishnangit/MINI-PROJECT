@@ -1,68 +1,157 @@
-from nltk.corpus import stopwords
+#input text article
+article_text= "linguistic expression, such as the English example The quick brown fox jumps over the lazy dog. In traditional grammar, it is typically defined as a string of words that expresses a complete thought, or as a unit consisting of a subject and predicate. In non-functional linguistics it is typically defined as a maximal unit of syntactic structure such as a constituent. In functional linguistics, it is defined as a unit of written texts delimited by graphological features such as upper case letters and markers such as periods, question marks, and exclamation marks. This notion contrasts with a curve, which is delimited by phonologic features such as pitch and loudness and markers such as pauses; and with a clause, which is a sequence of words that represents some process going on throughout time "
+Import Modules
 
-class sentence(object):
+import re
+import nltk
+Data Preprocessing
 
-	#------------------------------------------------------------------------------
-	# Description	: Constructor to initialize the setence object
-	# Parameters  	: docName, name of the document/file
-	#				  preproWords, words of the file after the stemming process
-	#				  originalWords, actual words before stemming
-	# Return 		: None
-	#------------------------------------------------------------------------------
-	def __init__(self, docName, preproWords, originalWords):
-		self.docName = docName
-		self.preproWords = preproWords
-		self.wordFrequencies = self.sentenceWordFreq()
-		self.originalWords = originalWords
+article_text = article_text.lower()
+article_text
+'linguistic expression, such as the english example the quick brown fox jumps over the lazy dog. in traditional grammar, it is typically defined as a string of words that expresses a complete thought, or as a unit consisting of a subject and predicate. in non-functional linguistics it is typically defined as a maximal unit of syntactic structure such as a constituent. in functional linguistics, it is defined as a unit of written texts delimited by graphological features such as upper case letters and markers such as periods, question marks, and exclamation marks. this notion contrasts with a curve, which is delimited by phonologic features such as pitch and loudness and markers such as pauses; and with a clause, which is a sequence of words that represents some process going on throughout time '
+# remove spaces, punctuations and numbers
+clean_text = re.sub('[^a-zA-Z]', ' ', article_text)
+clean_text = re.sub('\s+', ' ', clean_text)
+clean_text
+'linguistic expression such as the english example the quick brown fox jumps over the lazy dog in traditional grammar it is typically defined as a string of words that expresses a complete thought or as a unit consisting of a subject and predicate in non functional linguistics it is typically defined as a maximal unit of syntactic structure such as a constituent in functional linguistics it is defined as a unit of written texts delimited by graphological features such as upper case letters and markers such as periods question marks and exclamation marks this notion contrasts with a curve which is delimited by phonologic features such as pitch and loudness and markers such as pauses and with a clause which is a sequence of words that represents some process going on throughout time '
+import nltk
+nltk.download('punkt')
+[nltk_data] Downloading package punkt to /root/nltk_data...
+[nltk_data]   Unzipping tokenizers/punkt.zip.
+True
+# split into sentence list
+sentence_list = nltk.sent_tokenize(article_text)
+sentence_list
+['linguistic expression, such as the english example the quick brown fox jumps over the lazy dog.',
+ 'in traditional grammar, it is typically defined as a string of words that expresses a complete thought, or as a unit consisting of a subject and predicate.',
+ 'in non-functional linguistics it is typically defined as a maximal unit of syntactic structure such as a constituent.',
+ 'in functional linguistics, it is defined as a unit of written texts delimited by graphological features such as upper case letters and markers such as periods, question marks, and exclamation marks.',
+ 'this notion contrasts with a curve, which is delimited by phonologic features such as pitch and loudness and markers such as pauses; and with a clause, which is a sequence of words that represents some process going on throughout time']
+## run this cell once to download stopwords
+import nltk
+nltk.download('stopwords')
+[nltk_data] Downloading package stopwords to /root/nltk_data...
+[nltk_data]   Unzipping corpora/stopwords.zip.
+True
 
-	#------------------------------------------------------------------------------
-	# Description	: Function to return the name of the document
-	# Parameters	: None
-	# Return 		: name of the document
-	#------------------------------------------------------------------------------
-	def getDocName(self):
-		return self.docName
-	
-	#------------------------------------------------------------------------------
-	# Description	: Function to return the stemmed words
-	# Parameters	: None
-	# Return 		: stemmed words of the sentence
-	#------------------------------------------------------------------------------
-	def getPreProWords(self):
-		return self.preproWords
-	
-	#------------------------------------------------------------------------------
-	# Description	: Function to return the original words of the sentence before
-	#				  stemming
-	# Parameters	: None
-	# Return 		: pre-stemmed words
-	#------------------------------------------------------------------------------
-	def getOriginalWords(self):
-		return self.originalWords
+Word Frequencies
 
-	#------------------------------------------------------------------------------
-	# Description	: Function to return a dictonary of the word frequencies for
-	#				  the particular sentence object
-	# Parameters	: None
-	# Return 		: dictionar of word frequencies
-	#------------------------------------------------------------------------------
-	def getWordFreq(self):
-		return self.wordFrequencies	
-	
-	#------------------------------------------------------------------------------
-	# Description	: Function to create a dictonary of word frequencies for the
-	#				  sentence object
-	# Parameters	: None
-	# Return 		: dictionar of word frequencies
-	#------------------------------------------------------------------------------
-	def sentenceWordFreq(self):
-		wordFreq = {}
-		for word in self.preproWords:
-			if word not in wordFreq.keys():
-				wordFreq[word] = 1
-			else:
-				# if word in stopwords.words('english'):
-				# 	wordFreq[word] = 1
-				# else:			
-				wordFreq[word] = wordFreq[word] + 1
-		return wordFreq
+stopwords = nltk.corpus.stopwords.words('english')
+
+word_frequencies = {}
+for word in nltk.word_tokenize(clean_text):
+    if word not in stopwords:
+        if word not in word_frequencies:
+            word_frequencies[word] = 1
+        else:
+            word_frequencies[word] += 1
+maximum_frequency = max(word_frequencies.values())
+
+for word in word_frequencies:
+    word_frequencies[word] = word_frequencies[word] / maximum_frequency
+Calculate Sentence Scores
+
+sentence_scores = {}
+
+for sentence in sentence_list:
+    for word in nltk.word_tokenize(sentence):
+        if word in word_frequencies and len(sentence.split(' ')) < 30:
+            if sentence not in sentence_scores:
+                sentence_scores[sentence] = word_frequencies[word]
+            else:
+                sentence_scores[sentence] += word_frequencies[word]
+word_frequencies
+{'brown': 0.3333333333333333,
+ 'case': 0.3333333333333333,
+ 'clause': 0.3333333333333333,
+ 'complete': 0.3333333333333333,
+ 'consisting': 0.3333333333333333,
+ 'constituent': 0.3333333333333333,
+ 'contrasts': 0.3333333333333333,
+ 'curve': 0.3333333333333333,
+ 'defined': 1.0,
+ 'delimited': 0.6666666666666666,
+ 'dog': 0.3333333333333333,
+ 'english': 0.3333333333333333,
+ 'example': 0.3333333333333333,
+ 'exclamation': 0.3333333333333333,
+ 'expresses': 0.3333333333333333,
+ 'expression': 0.3333333333333333,
+ 'features': 0.6666666666666666,
+ 'fox': 0.3333333333333333,
+ 'functional': 0.6666666666666666,
+ 'going': 0.3333333333333333,
+ 'grammar': 0.3333333333333333,
+ 'graphological': 0.3333333333333333,
+ 'jumps': 0.3333333333333333,
+ 'lazy': 0.3333333333333333,
+ 'letters': 0.3333333333333333,
+ 'linguistic': 0.3333333333333333,
+ 'linguistics': 0.6666666666666666,
+ 'loudness': 0.3333333333333333,
+ 'markers': 0.6666666666666666,
+ 'marks': 0.6666666666666666,
+ 'maximal': 0.3333333333333333,
+ 'non': 0.3333333333333333,
+ 'notion': 0.3333333333333333,
+ 'pauses': 0.3333333333333333,
+ 'periods': 0.3333333333333333,
+ 'phonologic': 0.3333333333333333,
+ 'pitch': 0.3333333333333333,
+ 'predicate': 0.3333333333333333,
+ 'process': 0.3333333333333333,
+ 'question': 0.3333333333333333,
+ 'quick': 0.3333333333333333,
+ 'represents': 0.3333333333333333,
+ 'sequence': 0.3333333333333333,
+ 'string': 0.3333333333333333,
+ 'structure': 0.3333333333333333,
+ 'subject': 0.3333333333333333,
+ 'syntactic': 0.3333333333333333,
+ 'texts': 0.3333333333333333,
+ 'thought': 0.3333333333333333,
+ 'throughout': 0.3333333333333333,
+ 'time': 0.3333333333333333,
+ 'traditional': 0.3333333333333333,
+ 'typically': 0.6666666666666666,
+ 'unit': 1.0,
+ 'upper': 0.3333333333333333,
+ 'words': 0.6666666666666666,
+ 'written': 0.3333333333333333}
+sentence_scores
+{'in non-functional linguistics it is typically defined as a maximal unit of syntactic structure such as a constituent.': 4.666666666666666,
+ 'in traditional grammar, it is typically defined as a string of words that expresses a complete thought, or as a unit consisting of a subject and predicate.': 6.333333333333332,
+ 'linguistic expression, such as the english example the quick brown fox jumps over the lazy dog.': 3.3333333333333335}
+Summary
+
+import heapq
+summary = heapq.nlargest(5, sentence_scores, key=sentence_scores.get)
+
+print(" ".join(summary))
+in traditional grammar, it is typically defined as a string of words that expresses a complete thought, or as a unit consisting of a subject and predicate. in non-functional linguistics it is typically defined as a maximal unit of syntactic structure such as a constituent. linguistic expression, such as the english example the quick brown fox jumps over the lazy dog.
+BLEU scoring
+
+from nltk.translate.bleu_score import corpus_bleu
+article_text= ['linguistic expression, such as the English example The quick brown fox jumps over the lazy dog. In traditional grammar, it is typically defined as a string of words that expresses a complete thought, or as a unit consisting of a subject and predicate. In non-functional linguistics it is typically defined as a maximal unit of syntactic structure such as a constituent. In functional linguistics, it is defined as a unit of written texts delimited by graphological features such as upper case letters and markers such as periods, question marks, and exclamation marks. This notion contrasts with a curve, which is delimited by phonologic features such as pitch and loudness and markers such as pauses; and with a clause, which is a sequence of words that represents some process going on throughout time']
+summary= ['in traditional grammar, it is typically defined as a string of words that expresses a complete thought, or as a unit consisting of a subject and predicate. in non-functional linguistics it is typically defined as a maximal unit of syntactic structure such as a constituent. linguistic expression, such as the english example the quick brown fox jumps over the lazy dog.']
+score = corpus_bleu(article_text, summary)
+print(score)
+0.5339784398794585
+/usr/local/lib/python3.7/dist-packages/nltk/translate/bleu_score.py:490: UserWarning: 
+Corpus/Sentence contains 0 counts of 2-gram overlaps.
+BLEU scores might be undesirable; use SmoothingFunction().
+  warnings.warn(_msg)
+word count
+
+import re
+article_text = "linguistic expression, such as the English example The quick brown fox jumps over the lazy dog. In traditional grammar, it is typically defined as a string of words that expresses a complete thought, or as a unit consisting of a subject and predicate. In non-functional linguistics it is typically defined as a maximal unit of syntactic structure such as a constituent. In functional linguistics, it is defined as a unit of written texts delimited by graphological features such as upper case letters and markers such as periods, question marks, and exclamation marks. This notion contrasts with a curve, which is delimited by phonologic features such as pitch and loudness and markers such as pauses; and with a clause, which is a sequence of words that represents some process going on throughout time"
+summary="in traditional grammar, it is typically defined as a string of words that expresses a complete thought, or as a unit consisting of a subject and predicate. in non-functional linguistics it is typically defined as a maximal unit of syntactic structure such as a constituent. linguistic expression, such as the english example the quick brown fox jumps over the lazy dog"
+# using regex (findall()) function
+res = len(re.findall(r'\w+', article_text))
+# total no of words
+print ("The number of words in input : " + str(res))
+res1 = len(re.findall(r'\w+', summary))
+# total no of words
+print ("The number of words in output : " + str(res1))
+The number of words in input : 133
+The number of words in output : 62
